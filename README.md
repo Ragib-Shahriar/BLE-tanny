@@ -1,0 +1,1 @@
+This project focus on ESP32 BLE transmission for IOT
