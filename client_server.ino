@@ -6,8 +6,9 @@
 // client libraries
 #include <BLEScan.h>
 
+int id=1;
+
 int sid=0;
-int id=0;
 char dtype;
 
 char *SERVICE_UUIDS[] = {"4fafc201-1fb5-459e-8fcc-c5c9c331914b", "adbda632-8233-11eb-8dcd-0242ac130003", "0da307b6-8236-11eb-8dcd-0242ac130003"};
@@ -29,7 +30,7 @@ void setup() {
 
 void loop() {
   t2 = millis();
-  if(t2-t1<100000){
+  if(t2-t1<30000){
     if(dtype == 's'){
       if(r=='b'){
         setup_server();

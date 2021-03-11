@@ -5,6 +5,8 @@
 //// The characteristic of the remote service we are interested in.
 //static BLEUUID    charUUID("beb5483e-36e1-4688-b7f5-ea07361b26a8");
 
+bool no_service_found = true;
+
 // The remote service we wish to connect to.
 static BLEUUID serviceUUID(SERVICE_UUIDS[sid]);
 // The characteristic of the remote service we are interested in.
@@ -39,7 +41,7 @@ class MyClientCallback : public BLEClientCallbacks {
   }
 };
 
-bool connectToServer() {
+bool connectToServer() {  
     Serial.print("Forming a connection to ");
     Serial.println(myDevice->getAddress().toString().c_str());
     
@@ -53,13 +55,18 @@ bool connectToServer() {
     Serial.println(" - Connected to server");
 
     // Obtain a reference to the service we are after in the remote BLE server.
+    
     BLERemoteService* pRemoteService = pClient->getService(serviceUUID);
     if (pRemoteService == nullptr) {
       Serial.print("Failed to find our service UUID: ");
       Serial.println(serviceUUID.toString().c_str());
       pClient->disconnect();
+      Serial.println("Waiting for re-setup");
+      delay(1000);
+      setup_client();
       return false;
     }
+
     Serial.println(" - Found our service");
 
 
@@ -103,8 +110,11 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
       myDevice = new BLEAdvertisedDevice(advertisedDevice);
       doConnect = true;
       doScan = true;
-
-    } // Found our server
+      no_service_found = false;
+    } else {
+      no_service_found = true;
+      Serial.println("No Service Found!");
+    }// Found our server
   } // onResult
 }; // MyAdvertisedDeviceCallbacks
 
@@ -122,13 +132,16 @@ void setup_client() {
   pBLEScan->setInterval(1349);
   pBLEScan->setWindow(449);
   pBLEScan->setActiveScan(true);
-  pBLEScan->start(5, false);
+  pBLEScan->start(10, false);
 } // End of setup.
 
 
 // This is the Arduino main loop function.
 void loop_client() {
-
+  Serial.println("looping client");
+  if(no_service_found == true){
+    setup_client();
+  }
   // If the flag "doConnect" is true then we have scanned for and found the desired
   // BLE Server with which we wish to connect.  Now we connect to it.  Once we are 
   // connected we set the connected flag to be true.
